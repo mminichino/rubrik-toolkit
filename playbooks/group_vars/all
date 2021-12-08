@@ -1,0 +1,4 @@
+credentials:
+  node_ip: "{{ node_name if node_name is defined else 'rubrik' }}"
+  username: "{{ user_name if user_name is defined else 'admin' }}"
+  password: "{{ ask_password if ask_password is defined else lookup('vars',password_var) if password_var is defined else None }}"

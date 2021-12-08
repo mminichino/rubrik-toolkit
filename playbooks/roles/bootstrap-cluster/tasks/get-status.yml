@@ -1,0 +1,50 @@
+---
+#
+- name: Get Status
+  uri:
+    url: "https://{{ node_address }}/api/internal/cluster/me/bootstrap"
+    headers:
+      Accept: "application/json"
+      Host: "{{ host_header }}"
+    method: GET
+    return_content: yes
+    status_code: 200
+    validate_certs: false
+  register: bootstrap_run
+- debug:
+    msg: "Disk setup complete"
+  when: bootstrap_run.json.setupDisks == "SUCCESS" and not disk_setup_complete
+  tags: [print_action]
+- debug:
+    msg: "Metadata setup complete"
+  when: bootstrap_run.json.metadataSetup == "SUCCESS" and not metadata_setup_complete
+  tags: [print_action]
+- debug:
+    msg: "Cluster setup complete"
+  when: bootstrap_run.json.clusterInstall == "SUCCESS" and not cluster_setup_complete
+  tags: [print_action]
+- debug:
+    msg: "Servies started"
+  when: bootstrap_run.json.startServices == "SUCCESS" and not services_started
+  tags: [print_action]
+- name: Set disk_setup_complete
+  set_fact:
+    disk_setup_complete: True
+  when: bootstrap_run.json.setupDisks == "SUCCESS"
+- name: Set metadata_setup_complete
+  set_fact:
+    metadata_setup_complete: True
+  when: bootstrap_run.json.metadataSetup == "SUCCESS"
+- name: Set cluster_setup_complete
+  set_fact:
+    cluster_setup_complete: True
+  when: bootstrap_run.json.clusterInstall == "SUCCESS"
+- name: Set services_started
+  set_fact:
+    services_started: True
+  when: bootstrap_run.json.startServices == "SUCCESS"
+- meta: end_play
+  when: bootstrap_run.json.status == "SUCCESS"
+- name: Wait
+  pause:
+    seconds: 30

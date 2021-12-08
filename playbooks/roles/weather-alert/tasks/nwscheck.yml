@@ -1,0 +1,16 @@
+---
+#
+- set_fact:
+    feature_prop: "{{ item.properties }}"
+- set_fact:
+    alert_found: true
+    add_alert: true
+    alert_data: "Event: {{ item.properties.event }}, Certainty: {{ item.properties.certainty }}, Severity: {{ item.properties.severity }} for {{ item.properties.senderName }}"
+    alerts_list: "{{ alerts_list + [item.properties.event] }}"
+  when: feature_prop['@type'] == "wx:Alert" and item.properties.event not in alerts_list and item.properties.event not in nws_ignore
+- set_fact:
+    alert_text: |
+      {{ alert_text }}{{ alert_data }}
+  when: feature_prop['@type'] == "wx:Alert" and add_alert|bool == true
+- set_fact:
+    add_alert: false

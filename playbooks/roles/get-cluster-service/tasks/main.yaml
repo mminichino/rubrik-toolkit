@@ -1,0 +1,30 @@
+---
+# Get Cluster Service Installers
+- name: Create Directory
+  file:
+    path: "{{ base_dir }}"
+    state: directory
+- name: Get DEB Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent.x86_64.deb --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent.x86_64.deb"
+  ignore_errors: yes
+- name: Get RPM Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent.x86_64.rpm --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent.x86_64.rpm"
+  ignore_errors: yes
+- name: Get AIX 6.1 Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent-aix6.1.pcc.rpm --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent-aix6.1.pcc.rpm"
+  ignore_errors: yes
+- name: Get AIX 7.1 Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent-aix7.1.pcc.rpm --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent-aix7.1.pcc.rpm"
+  ignore_errors: yes
+- name: Get AIX 7.2 Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent-aix7.2.pcc.rpm --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent-aix7.2.pcc.rpm"
+  ignore_errors: yes
+- name: Get Windows Package
+  command: "wget https://{{ credentials.node_ip }}/connector/RubrikBackupService.zip --no-check-certificate --no-proxy -O {{ base_dir }}/RubrikBackupService.zip"
+  ignore_errors: yes
+- name: Get Solaris SPARC Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent-solaris.sparc.tar.gz --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent-solaris.sparc.tar.gz"
+  ignore_errors: yes
+- name: Get Solaris x86 Package
+  command: "wget https://{{ credentials.node_ip }}/connector/rubrik-agent-solaris.i386.tar.gz --no-check-certificate --no-proxy -O {{ base_dir }}/rubrik-agent-solaris.i386.tar.gz"
+  ignore_errors: yes

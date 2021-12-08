@@ -1,0 +1,22 @@
+---
+#
+# option:selective
+# var:user_name
+# var:node_name
+# var:cluster_name
+# var:admin_email
+# var:management_gateway
+# var:management_subnet_mask
+# var:enable_encryption
+# var:dns_nameservers
+# var:dns_search_domains
+# var:wait_for_completion
+# var:node_mgmt_ips_var
+# var:node_names_var
+# var:interface_name
+#
+- name: Bootstrap Cluster
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - bootstrap-cluster

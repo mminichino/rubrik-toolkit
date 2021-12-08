@@ -1,0 +1,61 @@
+---
+# tasks file for weather-alert
+- fail: msg="Latitude is required."
+  when: latitude is not defined
+- fail: msg="Longitude is required."
+  when: longitude is not defined
+- fail: msg="CDM IP or name is required."
+  when: credentials.node_ip is not defined
+- fail: msg="CDM password is required."
+  when: credentials.password is not defined
+- fail: msg="Email sender address is required."
+  when: mail_from is not defined
+- fail: msg="Email recipient address is required."
+  when: mail_to is not defined and sms|bool == false
+- fail: msg="Email password is required."
+  when: mail_password is not defined
+- fail: msg="Service type is required."
+  when: endpoint_type is not defined
+- set_fact:
+    alert_found: false
+    alert_text: |
+      Reported Weather Events:
+- name: Call National Weather Service
+  include: nws.yml
+  when: endpoint_type == 'nws'
+- meta: end_play
+  when: alert_found|bool == false
+- name: Get Report
+  uri:
+    url:  "https://{{ credentials.node_ip }}/api/v1/report/compliance_summary_sla?snapshot_range=LastSnapshot"
+    method: GET
+    user: "{{ credentials.username }}"
+    password: "{{ credentials.password }}"
+    body_format: json
+    status_code: 200
+    validate_certs: False
+    force_basic_auth: yes
+    timeout: 60
+  retries: 30
+  delay: 5
+  register: compliance_report
+- set_fact:
+    alert_text: |
+      {{ alert_text }}
+      SLA Compliance Report for {{ credentials.node_ip }}:
+      {{ compliance_report.json | to_nice_yaml }}
+- set_fact:
+    alert_brief: |
+      {{ credentials.node_ip }} Weather Event
+      SLA Compliance {{ compliance_report.json.percentOfInComplianceSnapshots }} percent
+- name: Send Notice Email
+  mail:
+    host: "{{ email_server }}"
+    port: 587
+    username: "{{ from_addr }}"
+    password: "{{ email_pass }}"
+    from: "{{ from_addr }}"
+    to: "{% if text_mode|bool == true %}{{ text_to }}{% else %}{{ to_addr }}{% endif %}"
+    subject: "Weather Event Detected"
+    body: "{% if text_mode|bool == true %}{{ alert_brief }}{% else %}{{ alert_text }}{% endif %}"
+    secure: starttls

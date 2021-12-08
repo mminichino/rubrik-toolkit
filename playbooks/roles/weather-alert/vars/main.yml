@@ -1,0 +1,11 @@
+---
+# vars file for weather-alert
+email_server: "{{ mail_host if mail_host is defined else 'smtp.office365.com' }}"
+from_addr: "{{ mail_from if mail_from is defined else None }}"
+to_addr: "{{ mail_to if mail_to is defined else None }}"
+email_pass: "{{ lookup('vars',mail_password) if mail_password is defined else None }}"
+text_mode: "{{ sms if sms is defined else 'false'|bool }}"
+cell_net: "{{ carrier if carrier is defined else 'verizon' }}"
+cell_num: "{{ number if number is defined else None }}"
+text_to: "{% if cell_net == 'verizon' %}{{ cell_num }}@vtext.com{% elif cell_net == 'tmobile' %}{{ cell_num }}@tmomail.net{% elif cell_net == 'att' %}{{ cell_num }}@txt.att.net{% else %}None{% endif %}"
+endpoint_type: "{{ service if service is defined else 'nws' }}"

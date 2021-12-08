@@ -1,0 +1,16 @@
+---
+# tasks file for managed-volume
+- name: Begin Snap
+  rubrikinc.cdm.rubrik_managed_volume:
+    provider: "{{ credentials }}"
+    name: "{{ mv_name }}"
+    action: begin
+    sla_name: "{{ mv_sla | default(omit) }}"
+  when: mode == 'begin'
+- name: End Snap
+  rubrikinc.cdm.rubrik_managed_volume:
+    provider: "{{ credentials }}"
+    name: "{{ mv_name }}"
+    action: end
+    sla_name: "{{ mv_sla | default(omit) }}"
+  when: mode == 'end'

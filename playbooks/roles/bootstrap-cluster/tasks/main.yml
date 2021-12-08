@@ -1,0 +1,90 @@
+---
+# tasks file for bootstrap-cluster
+- name: Get Bootstrap Status
+  uri:
+    url: "https://{{ node_address }}/api/internal/cluster/me/bootstrap"
+    headers:
+      Accept: "application/json"
+      Host: "{{ host_header }}"
+    method: GET
+    return_content: yes
+    status_code: 200
+    validate_certs: false
+  register: bootstrap_status
+- debug:
+    var: bootstrap_status.json.status
+- name: Create NTP Server List
+  set_fact:
+    ntp_server_list: []
+- name: NTP Servers
+  set_fact:
+    ntp_server_list: "{{ ntp_server_list + [ { 'server' : item } ] }}"
+  with_items: "{{ ntp_servers_var.split(',') }}"
+- name: Create DNS Server List
+  set_fact:
+    dns_server_list: []
+- name: DNS Servers
+  set_fact:
+    dns_server_list: "{{ dns_server_list + [ item ] }}"
+  with_items: "{{ dns_nameservers_var.split(',') }}"
+- name: Create DNS Domain List
+  set_fact:
+    dns_domain_list: []
+- name: DNS Domains
+  set_fact:
+    dns_domain_list: "{{ dns_domain_list + [ item ] }}"
+  with_items: "{{ dns_search_domains_var.split(',') }}"
+- name: Create Node List
+  set_fact:
+    nodes: {}
+- name: Nodes
+  set_fact:
+    nodes: "{{ nodes | combine( { item.0 : { 
+                                    'managementIpConfig' : {
+                                    'address' : item.1, 
+                                    'netmask' : management_subnet_mask_var,
+                                    'gateway' : management_gateway_var,
+                                    } } } ) }}"
+  with_together:
+    - "{{ node_names_var.split(',') }}"
+    - "{{ node_mgmt_ips_var.split(',') }}"
+- name: Create Bootstrap JSON
+  set_fact:
+    bootstrap_json: {
+      "name": "{{ cluster_name_var }}",
+      "adminUserInfo": {
+        "id": "admin",
+        "emailAddress": "{{ admin_email_var }}",
+        "password": "{{ admin_password_var }}"
+      },
+      "ntpServerConfigs" : "{{ ntp_server_list }}",
+      "dnsNameservers" : "{{ dns_server_list }}",
+      "dnsSearchDomains" : "{{ dns_domain_list }}",
+      "nodeConfigs" : "{{ nodes }}",
+      "enableSoftwareEncryptionAtRest": "{{ enable_encryption_var }}"
+    }
+- name: Bootstrap Cluster
+  uri:
+    url: "https://{{ node_address }}/api/internal/cluster/me/bootstrap"
+    headers:
+      Host: "{{ host_header }}"
+    method: POST
+    body: "{{ bootstrap_json }}"
+    body_format: json
+    status_code: 202
+    validate_certs: false
+  register: bootstrap_result
+  when: bootstrap_status.json.status == "UNKNOWN"
+  tags: [print_action]
+  changed_when: bootstrap_result.status == 202
+- debug:
+    msg: "Waiting for bootstrap to finish"
+  tags: [print_action]
+- name: Prep Monitor Loop
+  set_fact:
+    count: 200
+    start: 1
+- name: Monitor Bootstrap Status
+  include_tasks: get-status.yml
+  loop: "{{ range(start, count + 1)|list }}"
+  when: wait_for_completion_var|bool == true

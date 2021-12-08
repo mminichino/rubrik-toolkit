@@ -1,0 +1,62 @@
+---
+# tasks file for install-service
+- name: Get Host Record
+  uri:
+    url:  "https://{{ credentials.node_ip }}/api/v1/host?name={{ inventory_hostname }}"
+    method: GET
+    user: "{{ credentials.username }}"
+    password: "{{ credentials.password }}"
+    body_format: json
+    status_code: 200
+    validate_certs: False
+    force_basic_auth: yes
+    timeout: 60
+  retries: 30
+  delay: 5
+  register: rubrik_host
+  when: reinstall_flag|bool == true
+- name: Get Host Agent ID
+  uri:
+    url:  "https://{{ credentials.node_ip }}/api/v1/host/{{ rubrik_host.json.data[0].id }}"
+    method: GET
+    user: "{{ credentials.username }}"
+    password: "{{ credentials.password }}"
+    body_format: json
+    status_code: 200
+    validate_certs: False
+    force_basic_auth: yes
+    timeout: 60
+  retries: 30
+  delay: 5
+  register: host_details
+  when: reinstall_flag|bool == true
+- set_fact:
+    agent_id: |
+      {{ host_details.json.agentId }}
+  when: reinstall_flag|bool == true
+- name: Copy RBS package to host
+  ansible.builtin.copy:
+    src: "{{ base_dir }}/rubrik-agent.x86_64.rpm"
+    dest: /var/tmp/rubrik-agent.x86_64.rpm
+    mode: '0600'
+- name: Remove old package
+  yum:
+    name: rubrik-agent
+    state: absent
+- name: Install RBS package
+  yum:
+    name: /var/tmp/rubrik-agent.x86_64.rpm
+    state: latest
+    disable_gpg_check: yes
+- name: Stop RBS
+  ansible.builtin.command: service rubrikagents stop
+  when: reinstall_flag|bool == true
+- name: Copy UUID
+  ansible.builtin.copy:
+    content: "{{ agent_id }}"
+    dest: /etc/rubrik/conf/uuid
+    mode: '0644'
+  when: reinstall_flag|bool == true
+- name: Start RBS
+  ansible.builtin.command: service rubrikagents start
+  when: reinstall_flag|bool == true

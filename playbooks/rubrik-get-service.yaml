@@ -1,0 +1,13 @@
+---
+#
+# var:user_name
+# var:node_name
+# var:local_dir
+# var:by_version
+#
+- name: Get Cluster RBS Packages
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - { role: get-cluster-version, when: get_vers|bool }
+    - get-cluster-service

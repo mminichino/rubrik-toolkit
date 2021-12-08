@@ -1,0 +1,4 @@
+---
+# Vars for get-cluster-service
+base_dir: "{% if sw_version is defined %}{{ local_dir }}/{{ credentials.node_ip }}/{{ sw_version }}{% else %}{{ local_dir }}/{{ credentials.node_ip }}{% endif %}"
+get_vers: "{{ by_version if by_version is defined else 'true'|bool }}"

@@ -1,0 +1,36 @@
+---
+# NWS Module
+- set_fact:
+    alerts_list: []
+    add_alert: false
+    nws_ignore:
+      - "Heat Advisory"
+      - "Air Quality Alert"
+      - "Administrative Message"
+      - "Test"
+      - "Child Abduction Emergency"
+      - "Blue Alert"
+      - "911 Telephone Outage"
+      - "Dust Advisory"
+- name: Get Weather Data
+  uri:
+    url: "https://api.weather.gov/alerts?active=true&status=actual&point={{ latitude }},{{ longitude }}"
+    method: GET
+    headers:
+      Host: api.weather.gov
+      User-Agent: curl/7.61.1
+      Accept: application/geo+json
+    body_format: json
+    status_code: 200
+    timeout: 60
+    validate_certs: False
+  retries: 30
+  delay: 10
+  register: weather_data
+  until: ('status' in weather_data) and (weather_data.status == 200)
+- name: Set Weather Fact
+  set_fact:
+    weather_features: "{{ weather_data.json.features }}"
+- name: Check For Alerts
+  include: nwscheck.yml
+  with_items: "{{ weather_data.json.features | list }}"

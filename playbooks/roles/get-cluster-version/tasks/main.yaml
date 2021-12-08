@@ -1,0 +1,11 @@
+---
+# Get Cluster Version
+- name: Get Cluster Version
+  rubrikinc.cdm.rubrik_cluster_version:
+    provider: "{{ credentials }}"
+  register: clu_version
+- set_fact:
+    sw_version: "{{ clu_version.version }}"
+- debug:
+    var: sw_version
+  when: print_flag|bool == true

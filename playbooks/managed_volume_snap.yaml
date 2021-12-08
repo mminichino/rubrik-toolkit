@@ -1,0 +1,13 @@
+---
+#
+# var:user_name
+# var:node_name
+# var:volume
+# var:sla_policy
+# var:action
+#
+- name: Managed Volume Snap
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - managed-volume

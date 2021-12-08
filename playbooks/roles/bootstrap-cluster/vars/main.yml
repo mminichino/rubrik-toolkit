@@ -1,0 +1,21 @@
+---
+# vars file for bootstrap-cluster
+interface_name_var: "{{ interface_name if interface_name is defined else None }}"
+node_address: "{% if interface_name is defined %}[{{ node_name }}%{{ interface_name }}]{% else %}{{ node_name }}{% endif %}"
+host_header: "{% if interface_name is defined %}[{{ node_name }}]{% else %}{{ node_name }}{% endif %}"
+cluster_name_var: "{{ cluster_name if cluster_name is defined else 'rubrik' }}"
+admin_email_var: "{{ admin_email if admin_email is defined else None }}"
+admin_password_var: "{{ ask_password if ask_password is defined else lookup('vars',password_var) if password_var is defined else None }}"
+management_gateway_var: "{{ management_gateway if management_gateway is defined else None }}"
+management_subnet_mask_var: "{{ management_subnet_mask if management_subnet_mask is defined else '255.255.255.0' }}"
+enable_encryption_var: "{{ enable_encryption|bool if enable_encryption is defined else 'true'|bool }}"
+dns_nameservers_var: "{{ dns_nameservers if dns_nameservers is defined else '8.8.8.8' }}"
+dns_search_domains_var: "{{ dns_search_domains if dns_search_domains is defined else None }}"
+ntp_servers_var: "{{ ntp_servers if ntp_servers is defined else 'pool.ntp.org' }}"
+wait_for_completion_var: "{{ wait_for_completion if wait_for_completion is defined else 'true'|bool }}"
+node_mgmt_ips_var: "{{ node_mgmt_ips if node_mgmt_ips is defined else None }}"
+node_names_var: "{{ node_names if node_names is defined else None }}"
+disk_setup_complete: False
+metadata_setup_complete: False
+cluster_setup_complete: False
+services_started: False

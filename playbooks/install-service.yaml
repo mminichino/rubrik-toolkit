@@ -1,0 +1,15 @@
+---
+#
+# var:user_name
+# var:node_name
+# var:local_dir
+# var:sw_version
+# var:host_pass_var
+# var:host_user
+# var:reinstall
+#
+- name: Install Cluster RBS Packages
+  hosts: all
+  gather_facts: no
+  roles:
+    - install-service

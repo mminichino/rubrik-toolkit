@@ -1,0 +1,5 @@
+---
+# vars file for managed-volume
+mv_name: "{{ volume if volume is defined else None }}"
+sla_name: "{{ sla_policy if sla_policy is defined else false|bool }}"
+mode: "{{ action if action is defined else None }}"

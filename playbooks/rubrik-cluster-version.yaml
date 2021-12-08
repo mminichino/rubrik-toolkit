@@ -1,0 +1,11 @@
+---
+#
+# var:user_name
+# var:node_name
+# var:print_debug
+#
+- name: Get Cluster Version
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - get-cluster-version

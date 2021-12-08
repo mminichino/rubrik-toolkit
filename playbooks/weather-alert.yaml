@@ -1,0 +1,20 @@
+---
+#
+# var:user_name
+# var:node_name
+# var:latitude
+# var:longitude
+# var:mail_to
+# var:mail_from
+# var:mail_host
+# var:mail_password
+# var:sms
+# var:carrier
+# var:number
+# var:service
+#
+- name: Check for Current Weather Alerts
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - weather-alert
